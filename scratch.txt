@@ -1,0 +1,112 @@
+
+  
+  Storm:
+  
+  <div class="flex h-full w-full flex-row gap-3 p-3">
+    <!-- Left Panel - Controls -->
+    <div class="flex h-full w-128 flex-col gap-3 overflow-y-auto scrollbar-color scrollbar-track-surface-200 scrollbar-thumb-surface-600">
+      
+      <!-- System Parameters Section -->
+      <fieldset class="w-full border border-surface-200 p-2 rounded-md">
+        <legend class="px-2 font-medium">System Parameters</legend>
+        <div class="grid grid-cols-2 gap-2">
+          <IftaLabel variant="in">
+            <InputNumber 
+              v-model="stormParameters.rainfallRate"
+              id="rainfall-rate"
+              suffix=" in/hr"
+              :spellcheck="false"
+              :minFractionDigits="0"
+              :maxFractionDigits="2"
+              fluid
+            />
+            <label for="rainfall-rate">Rainfall Rate</label>
+          </IftaLabel>
+          <IftaLabel variant="in">
+            <Select v-model="stormParameters.pipeSlope" id="pipe-slope" :options="slopeOptions" optionLabel="label" optionValue="value" fluid/>
+            <label for="pipe-slope">Horizontal Pipe Slope:</label>
+          </IftaLabel>
+        </div>
+      </fieldset>
+
+      <!-- Drain Definitions Section -->
+      <fieldset class="w-full border border-surface-200 p-2 rounded-md">
+        <legend class="px-2 font-medium">Drain Definitions</legend>
+        <div class="flex flex-col gap-1">
+          <VueDraggable
+            :model-value="drainIds"
+            :itemKey="(id: string) => id"
+            :group="{ name: 'stormTree', pull: 'clone', put: false }"
+            :sort="false"
+            :clone="cloneDrain"
+            class="flex flex-col gap-1"
+            handle=".handle"
+          >
+            <div 
+              v-for="drainId in drainIds" 
+              :key="drainId" 
+              class="flex w-full flex-row gap-2 py-1"
+            >
+              <Button icon="pi pi-times" size="small" severity="secondary" @click="store.removeDrain(drainId)"/>
+              <IftaLabel>
+                <InputText v-model="getDrainNameBinding(drainId).value" :id="drainId + '-mark'" fluid/>
+                <label :for="drainId + '-mark'">Mark:</label>
+              </IftaLabel>
+              <IftaLabel>
+                
+                <InputNumber 
+                  :id="drainId + '-area'" 
+                  v-model="getDrainAreaBinding(drainId).value" 
+                  placeholder="Area"
+                  suffix=" sqft"
+                  class="w-32"
+                  :spellcheck="false"
+                  :minFractionDigits="0"
+                  :maxFractionDigits="2"
+                  fluid
+                />
+                <label :for="drainId + '-area'">Area:</label>
+              </IftaLabel>
+              <div class="w-8 my-0 bg-surface-100 rounded-md text-text-primary cursor-grab handle">
+                <svg width="auto" height="auto" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <!-- Three vertical dots on the left -->
+                  <circle cx="9" cy="6" r="1.5" fill="currentColor"/>
+                  <circle cx="9" cy="12" r="1.5" fill="currentColor"/>
+                  <circle cx="9" cy="18" r="1.5" fill="currentColor"/>
+                  <!-- Three vertical dots on the right -->
+                  <circle cx="15" cy="6" r="1.5" fill="currentColor"/>
+                  <circle cx="15" cy="12" r="1.5" fill="currentColor"/>
+                  <circle cx="15" cy="18" r="1.5" fill="currentColor"/>
+                </svg>
+              </div>
+            </div>
+          </VueDraggable>
+          <Button icon="pi pi-plus" size="small" @click="store.newDrain"/>
+
+
+        </div>
+      </fieldset>
+
+    </div>
+
+    <!-- Right Panel - Tree View -->
+    <div class="pt-3 flex flex-col gap-3 h-full flex-1 overflow-y-auto scrollbar-color scrollbar-track-surface-200 scrollbar-thumb-surface-600">
+      <Button @click="store.newRoot" label="New Riser"/>
+      
+      <!-- Roots -->
+      <div v-for="root in getRootIds" :key="root" class="w-full p-3 border border-surface-600 rounded-md bg-surface-50">
+        <div class="node-content p-1 border-surface-600 border-2 mt-2">
+          <InputText 
+            v-model="getRootNameBinding(root).value" 
+            placeholder="Riser Name"
+            class="me-2"
+          />
+          <Button @click="newBranch(root)" label="New Branch"/>
+        </div>
+        
+        <!-- Children -->
+        <StormTree :node-list="nodeMap.get(root)?.children" :parent-id="root"/>
+      </div>
+      
+    </div>
+  </div>
