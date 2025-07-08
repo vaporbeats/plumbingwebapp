@@ -10,4 +10,5 @@ export default defineConfig({
     tailwindcss(),
     vueDevTools(),
   ],
+  base: '/plumbingwebapp/'
 })
